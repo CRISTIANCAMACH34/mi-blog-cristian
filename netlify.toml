@@ -1,9 +1,16 @@
 [build]
-  command = "echo 'No build needed for static site'"
-  publish = "."
+  command = "npm run build"
+  publish = "dist"
 
 [build.environment]
   NODE_VERSION = "18"
 
 [context.production.environment]
   NODE_ENV = "production"
+
+[redirects]
+  / = /index.html
+  /blog/* = /index.html
+  /glosario/* = /index.html
+  /contacto/* = /index.html
+  /acerca-de/* = /index.html
