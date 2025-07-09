@@ -285,7 +285,10 @@
 
     <div class="main-content-wrapper container mx-auto px-4 py-8 flex flex-col lg:flex-row gap-8 flex-grow">
         <main id="blog-content" class="flex-grow lg:flex-[3] min-w-0">
-            </main>
+            <div class="space-y-8">
+                <!-- Contenido dinámico se insertará aquí -->
+            </div>
+        </main>
 
         <aside class="sidebar lg:flex-[1] min-w-[280px] bg-white p-6 rounded-lg shadow-sm self-start">
             <div class="widget mb-8">
@@ -679,9 +682,15 @@
         // Función para renderizar la página de inicio (todas las publicaciones)
         function renderHomePage() {
             const contentDiv = document.getElementById('blog-content');
-            contentDiv.innerHTML = '<h2 class="text-3xl lg:text-4xl font-bold mb-8 text-gray-900">Últimas Publicaciones</h2>';
-            blogPosts.sort((a, b) => new Date(b.date) - new Date(a.date)).forEach(post => { // Ordena por fecha
-                contentDiv.innerHTML += renderPostCard(post);
+            const contentContainer = contentDiv.querySelector('.space-y-8');
+            if (!contentContainer) {
+                console.error('No se encontró el contenedor de contenido');
+                return;
+            }
+            
+            contentContainer.innerHTML = '<h2 class="text-3xl lg:text-4xl font-bold mb-8 text-gray-900">Últimas Publicaciones</h2>';
+            blogPosts.sort((a, b) => new Date(b.date) - new Date(a.date)).forEach(post => {
+                contentContainer.innerHTML += renderPostCard(post);
             });
             attachReadMoreListeners(); // Adjuntar listeners después de renderizar
         }
