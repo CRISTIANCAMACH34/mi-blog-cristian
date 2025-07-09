@@ -1,16 +1,10 @@
 [build]
-  command = "npm run build"
-  publish = "dist"
-
-[build.environment]
-  NODE_VERSION = "18"
-
-[context.production.environment]
-  NODE_ENV = "production"
+  command = "echo 'No build needed for static site'"
+  publish = "./"
 
 [redirects]
-  / = /index.html
-  /blog/* = /index.html
-  /glosario/* = /index.html
-  /contacto/* = /index.html
-  /acerca-de/* = /index.html
+  / = /Block.html
+  /blog/* = /Block.html
+  /glosario/* = /Block.html
+  /contacto/* = /Block.html
+  /acerca-de/* = /Block.html
