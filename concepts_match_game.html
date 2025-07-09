@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Vocabulary Match Game</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      background: #f0f8ff;
+      padding: 20px;
+    }
+    h1 {
+      color: #333;
+    }
+    .game-container {
+      display: flex;
+      justify-content: space-around;
+      flex-wrap: wrap;
+    }
+    .column {
+      width: 45%;
+    }
+    .term, .definition {
+      background: white;
+      border: 1px solid #aaa;
+      padding: 10px;
+      margin: 10px;
+      border-radius: 6px;
+      cursor: grab;
+    }
+    .matched {
+      background: #c8e6c9;
+      border-color: green;
+    }
+  </style>
+</head>
+<body>
+  <h1>Match the Words to Their Definitions</h1>
+  <div class="game-container">
+    <div class="column" id="terms">
+      <div class="term" draggable="true" id="Watching">Watching</div>
+      <div class="term" draggable="true" id="These">These</div>
+      <div class="term" draggable="true" id="Although">Although</div>
+      <div class="term" draggable="true" id="Been">Been</div>
+      <div class="term" draggable="true" id="Little">Little</div>
+      <div class="term" draggable="true" id="Traveling">Traveling</div>
+      <div class="term" draggable="true" id="Shouldds">Shouldds</div>
+    </div>
+    <div class="column" id="definitions">
+      <div class="definition" ondrop="drop(event)" ondragover="allowDrop(event)" data-term="Watching">Looking at something for a period of time.</div>
+      <div class="definition" ondrop="drop(event)" ondragover="allowDrop(event)" data-term="These">Plural form of “this”, used to refer to specific items nearby.</div>
+      <div class="definition" ondrop="drop(event)" ondragover="allowDrop(event)" data-term="Although">Used to introduce a contrast or exception.</div>
+      <div class="definition" ondrop="drop(event)" ondragover="allowDrop(event)" data-term="Been">Past participle of “be”, used in perfect tenses.</div>
+      <div class="definition" ondrop="drop(event)" ondragover="allowDrop(event)" data-term="Little">Small in size or amount.</div>
+      <div class="definition" ondrop="drop(event)" ondragover="allowDrop(event)" data-term="Traveling">The act of going from one place to another.</div>
+      <div class="definition" ondrop="drop(event)" ondragover="allowDrop(event)" data-term="Shouldds">(Shoulds) Moral obligations or advice; things one ought to do.</div>
+    </div>
+  </div>
+
+  <script>
+    function allowDrop(ev) {
+      ev.preventDefault();
+    }
+
+    document.querySelectorAll('.term').forEach(term => {
+      term.addEventListener('dragstart', ev => {
+        ev.dataTransfer.setData('text', ev.target.id);
+      });
+    });
+
+    function drop(ev) {
+      ev.preventDefault();
+      const termId = ev.dataTransfer.getData('text');
+      const droppedTerm = document.getElementById(termId);
+      const correctTerm = ev.target.getAttribute('data-term');
+
+      if (termId === correctTerm) {
+        ev.target.textContent = droppedTerm.textContent + " ✅";
+        ev.target.classList.add('matched');
+        droppedTerm.remove();
+      } else {
+        alert("❌ Incorrect match. Try again!");
+      }
+    }
+  </script>
+</body>
+</html>
