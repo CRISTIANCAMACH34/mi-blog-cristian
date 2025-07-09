@@ -2,9 +2,7 @@
   command = "echo 'No build needed for static site'"
   publish = "./"
 
-[redirects]
-  / = /Block.html
-  /blog/* = /Block.html
-  /glosario/* = /Block.html
-  /contacto/* = /Block.html
-  /acerca-de/* = /Block.html
+[[redirects]]
+  from = "/*"
+  to = "/Block.html"
+  status = 200

@@ -1,0 +1,8 @@
+{
+  "name": "mi-blog-cristian",
+  "version": "1.0.0",
+  "description": "Mi Increíble Blog",
+  "scripts": {
+    "build": "mkdir -p dist && cp -r * dist/"
+  }
+}
