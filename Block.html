@@ -1,0 +1,980 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mi Increíble Blog - Tailwind CSS</title>
+    <link href="https://fonts.googleapis.com/css2?family=Merriweather:wght@400;700&family=Open+Sans:wght@400;600&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Fuentes personalizadas */
+        body {
+            font-family: 'Open Sans', sans-serif;
+        }
+        h1, h2, h3, h4, h5, h6 {
+            font-family: 'Merriweather', serif;
+        }
+        /* Clase para el enlace activo en la navegación */
+        .nav-link.active {
+            @apply bg-blue-700 text-white; /* Tailwind classes for active link */
+        }
+
+        /* ESTILOS PARA MEDIOS RESPONSIVOS (IMAGEN, VIDEO Y YOUTUBE) */
+        /* Contenedor general para los medios en tarjetas y modales */
+        /* Removido el padding y background-color de media-container
+           para que la imagen/video lo rellene completamente y no se vea el fondo gris. */
+        .media-container {
+            width: 100%;
+            height: auto; /* Ajuste para que el contenedor se adapte al contenido */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            /* Eliminados: padding, background-color, transform, etc. */
+        }
+
+        /* Estilos para iFrame de YouTube en tarjetas */
+        .post-card-media iframe {
+            width: 100%;
+            height: 200px;
+            border-radius: 0.5rem;
+            margin-bottom: 1rem;
+            display: block;
+            border: none;
+        }
+
+        /* Estilos para iFrame de YouTube en modal */
+        .single-post-media iframe {
+            width: 100%;
+            max-height: 400px;
+            height: auto;
+            border-radius: 0.5rem;
+            margin-bottom: 1.5rem;
+            display: block;
+            border: none;
+        }
+
+        /* Responsive para iFrame de YouTube */
+        @media (max-width: 768px) {
+            .post-card-media iframe {
+                height: 180px;
+            }
+            .single-post-media iframe {
+                max-height: 300px;
+            }
+        }
+
+        /* Estilos para IMAGENES dentro de tarjetas */
+        .post-card-media img {
+            width: 100%;
+            height: 200px; /* Altura fija para consistencia en las tarjetas */
+            object-fit: cover; /* Recorta la imagen para cubrir el área */
+            border-radius: 0.5rem; /* rounded-md */
+            margin-bottom: 1rem; /* mb-4 */
+            display: block; /* Asegura que no haya espacio extra debajo de la imagen */
+        }
+
+        /* Estilos para VIDEOS dentro de tarjetas */
+        .post-card-media video {
+            width: 100%;
+            height: 200px; /* Altura fija para consistencia en las tarjetas, igual que la imagen */
+            object-fit: cover; /* Recorta el video para cubrir el área */
+            border-radius: 0.5rem; /* rounded-md */
+            margin-bottom: 1rem; /* mb-4 */
+            display: block;
+        }
+
+        /* Estilos para IMAGENES dentro del modal de publicación individual */
+        .single-post-media img {
+            width: 100%; /* Ocupa todo el ancho disponible */
+            max-height: 400px; /* Altura máxima para evitar imágenes excesivamente largas */
+            height: auto; /* Mantiene la proporción de la imagen */
+            object-fit: contain; /* Asegura que la imagen se vea completa dentro del contenedor */
+            border-radius: 0.5rem; /* rounded-lg */
+            margin-bottom: 1.5rem; /* mb-6 */
+            display: block;
+            margin-left: auto; /* Centrar la imagen si es más pequeña que el ancho */
+            margin-right: auto; /* Centrar la imagen si es más pequeña que el ancho */
+        }
+
+        /* Estilos para VIDEOS dentro del modal de publicación individual */
+        .single-post-media video {
+            width: 100%; /* Ocupa todo el ancho disponible */
+            max-height: 400px; /* Altura máxima para evitar videos excesivamente largos, igual que la imagen */
+            height: auto; /* Mantiene la proporción del video */
+            object-fit: contain; /* Asegura que el video se vea completo dentro del contenedor */
+            border-radius: 0.5rem; /* rounded-lg */
+            margin-bottom: 1.5rem; /* mb-6 */
+            display: block;
+            margin-left: auto; /* Centrar el video si es más pequeña que el ancho */
+            margin-right: auto; /* Centrar el video si es más pequeña que el ancho */
+        }
+
+        /* Responsive para medios en pantallas más pequeñas */
+        @media (max-width: 768px) {
+            .post-card-media img,
+            .post-card-media video {
+                height: 180px; /* Ligeramente más pequeña en móviles */
+            }
+            .single-post-media img,
+            .single-post-media video {
+                max-height: 300px; /* Ligeramente más pequeña en móviles */
+            }
+        }
+
+        /* Estilos para el Modal (Ventana Emergente) */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7); /* Fondo oscuro semitransparente */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000; /* Asegura que esté por encima de todo */
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+        }
+
+        .modal-overlay.show {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .modal-content {
+            background-color: #fff;
+            padding: 2.5rem; /* p-10 */
+            border-radius: 0.75rem; /* rounded-xl */
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3); /* shadow-2xl */
+            max-width: 800px;
+            width: 90%;
+            max-height: 90vh; /* Para que sea scrollable si el contenido es largo */
+            overflow-y: auto; /* Permite desplazamiento vertical */
+            position: relative;
+            transform: scale(0.9);
+            transition: transform 0.3s ease;
+        }
+
+        .modal-overlay.show .modal-content {
+            transform: scale(1);
+        }
+
+        .modal-close-btn {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: none;
+            border: none;
+            font-size: 2rem; /* text-4xl */
+            color: #2647dc; /* text-red-500, ajustado para coincidir con tu color */
+            cursor: pointer;
+            line-height: 1;
+            transition: color 0.2s ease;
+        }
+
+        .modal-close-btn:hover {
+            color: #2647dc; /* text-red-700, ajustado para coincidir con tu color */
+        }
+
+        /* Estilos para el Sistema de Notificaciones Personalizadas */
+        #notification-container {
+            position: fixed;
+            top: 1.5rem; /* top-6 */
+            right: 1.5rem; /* right-6 */
+            z-index: 10000; /* Por encima de todo, incluso del modal */
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            max-width: 400px; /* Ancho máximo para las notificaciones */
+            pointer-events: none; /* Permite clics a través del contenedor si está vacío */
+        }
+
+        .notification {
+            background-color: white;
+            padding: 1rem 1.5rem; /* p-4 px-6 */
+            border-radius: 0.5rem; /* rounded-lg */
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15); /* shadow-lg */
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1rem;
+            opacity: 0;
+            transform: translateX(100%);
+            transition: opacity 0.3s ease-out, transform 0.3s ease-out;
+            pointer-events: auto; /* Hace que la notificación sea clicable */
+        }
+
+        .notification.show {
+            opacity: 1;
+            transform: translateX(0);
+        }
+
+        .notification.hide {
+            opacity: 0;
+            transform: translateX(100%);
+        }
+
+        /* Tipos de notificación - Mantenidos tus colores */
+        .notification.info {
+            background-color: #e0f2fe; /* blue-100 */
+            color: #1e40af; /* blue-800 */
+            border-left: 5px solid #3b82f6; /* blue-500 */
+        }
+        .notification.success {
+            background-color: #d1fae5; /* green-100 */
+            color: #10b981; /* green-600 */
+            border-left: 5px solid #059669; /* green-600 */
+        }
+        .notification.error {
+            background-color: #fee2e2; /* red-100 */
+            color: #2647dc; /* red-600 - tu color original */
+            border-left: 5px solid #2647dc; /* red-500 - tu color original */
+        }
+        .notification.warning {
+            background-color: #77afd7; /* amber-100 - tu color original */
+            color: #3266bb; /* amber-600 - tu color original */
+            border-left: 5px solid #1e49cc; /* amber-500 - tu color original */
+        }
+
+        .notification-message {
+            flex-grow: 1;
+            font-weight: 500; /* font-medium */
+        }
+
+        .notification-close-btn {
+            background: none;
+            border: none;
+            font-size: 1.5rem; /* text-2xl */
+            line-height: 1;
+            color: inherit; /* Hereda el color del tipo de notificación */
+            cursor: pointer;
+            opacity: 0.7;
+            transition: opacity 0.2s ease;
+        }
+
+        .notification-close-btn:hover {
+            opacity: 1;
+        }
+    </style>
+</head>
+<body class="flex flex-col min-h-screen bg-gray-100 text-gray-800">
+
+    <header class="bg-gray-900 text-white py-4 shadow-md">
+        <div class="container mx-auto px-4 flex flex-col md:flex-row justify-between items-center">
+            <h1 class="text-3xl font-bold mb-3 md:mb-0">
+                <a href="#home" class="text-white hover:text-blue-400 transition-colors duration-300">Mi Increíble Blog</a>
+            </h1>
+            <div class="text-base md:text-lg space-y-1">
+                <p href="#home" class="text-white hover:text-blue-200 transition-colors duration-100">Name: Cristian Camacho</p>
+                <p href="#home" class="text-white hover:text-blue-200 transition-colors duration-100">Program: Tecnólogo ADSO</p>
+                <p href="#home" class="text-white hover:text-blue-200 transition-colors duration-100">Regional: Guaviare</p>
+                <p href="#home" class="text-white hover:text-blue-200 transition-colors duration-100">Evidence: Entry #1 – My PLE Mind Map</p>
+            </div>
+            <nav class="main-nav">
+                <ul class="flex flex-col md:flex-row gap-4 md:gap-6 text-lg">
+                    <li><a href="#home" class="nav-link text-white hover:text-blue-400 transition-colors duration-300 py-2 px-3 rounded-md hover:bg-gray-800">Inicio</a></li>
+                    <li><a href="#categories" class="nav-link text-white hover:text-blue-400 transition-colors duration-300 py-2 px-3 rounded-md hover:bg-gray-800">Categorías</a></li>
+                    <li><a href="#about" class="nav-link text-white hover:text-blue-400 transition-colors duration-300 py-2 px-3 rounded-md hover:bg-gray-800">Acerca de</a></li>
+                    <li><a href="#admin" class="nav-link text-white hover:text-blue-400 transition-colors duration-300 py-2 px-3 rounded-md hover:bg-blue-600 font-bold">Añadir Publicación</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <div class="main-content-wrapper container mx-auto px-4 py-8 flex flex-col lg:flex-row gap-8 flex-grow">
+        <main id="blog-content" class="flex-grow lg:flex-[3] min-w-0">
+            </main>
+
+        <aside class="sidebar lg:flex-[1] min-w-[280px] bg-white p-6 rounded-lg shadow-sm self-start">
+            <div class="widget mb-8">
+                <h3 class="text-2xl font-bold text-gray-800 mb-4 pb-2 border-b-2 border-gray-200">Buscar</h3>
+                <form class="search-form flex gap-2">
+                    <input type="text" placeholder="Buscar publicaciones..." class="flex-grow p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400">
+                    <button type="submit" class="bg-blue-600 text-white px-4 py-3 rounded-md hover:bg-blue-700 transition-colors duration-300">Ir</button>
+                </form>
+            </div>
+
+            <div class="widget mb-8">
+                <h3 class="text-2xl font-bold text-gray-800 mb-4 pb-2 border-b-2 border-gray-200">Categorías</h3>
+                <ul id="category-list">
+                    </ul>
+            </div>
+
+            <div class="widget">
+                <h3 class="text-2xl font-bold text-gray-800 mb-4 pb-2 border-b-2 border-gray-200">Publicaciones Recientes</h3>
+                <ul id="recent-posts-list">
+                    </ul>
+            </div>
+        </aside>
+    </div>
+
+    <footer class="bg-gray-900 text-white py-6 text-center mt-auto">
+        <div class="container mx-auto px-4">
+            <p class="text-sm">&copy; 2025 Mi Increíble Blog. Todos los derechos reservados. | <a href="#privacy" class="text-blue-400 hover:underline">Política de Privacidad</a> | <a href="#terms" class="text-blue-400 hover:underline">Términos de Servicio</a></p>
+        </div>
+    </footer>
+
+    <div id="post-modal-overlay" class="modal-overlay">
+        <div class="modal-content">
+            <button id="modal-close-btn" class="modal-close-btn">&times;</button>
+            <div id="modal-post-content">
+                </div>
+        </div>
+    </div>
+
+    <div id="notification-container"></div>
+
+    <script>
+        // Array de objetos para simular publicaciones del blog
+        // NOTA: Estas publicaciones NO se guardarán de forma persistente.
+        // Si refrescas la página, se perderán las publicaciones añadidas manualmente.
+        // Para persistencia, se necesita un backend con base de datos.
+        let blogPosts = [
+            {
+                id: 'post-1',
+                title: 'Comida Favorita',
+                date: '8 de Julio de 2025',
+                author: 'Cristian Camacho',
+                category: 'comida',
+                categoryDisplay: 'Comida',
+                media: [ // Array con un solo objeto multimedia
+                    { type: 'image', url: '' }
+                ],
+                excerpt: 'Some of the foods I like the most are: Hamburger, suckling pig, hot dog, lasagna and stuffed arepa.',
+                content: 'Hamburger, suckling pig, hot dog, lasagna and stuffed arepa.'
+            },
+            {
+                id: 'post-2',
+                title: 'Beautiful Moments',
+                date: '16 de Junio de 2025',
+                author: 'Cristian Camacho',
+                category: 'momentos',
+                categoryDisplay: 'Moments',
+                media: [ 
+                    { type: 'video', url: 'jj.mp4' },
+                    { type: 'image', url: '' },
+                    { type: 'image', url: 'amig1.jpeg'}, 
+                    { type: 'image', url: 'amig3.jpeg',},
+                    { type: 'image', url: 'WhatsApp Image 2025-07-02 at 9.45.11 AM.jpeg'},
+                    { type: 'image', url: 'herma9.jpeg'},
+                    { type: 'image', url: 'Mario-Mongui.jpeg'},
+                    { type: 'image', url: 'Grupo67.jpeg'},
+                    { type: 'image', url: 'Diego.jpeg'},
+                    { type: 'image', url: 'Daniel.jpeg'},
+                    { type: 'image', url: 'Valdes.jpeg'},
+                    { type: 'image', url: 'Darwin.jpeg'},
+                    
+                ],
+                excerpt: 'Memories are the essence and testimony of life over time. Enjoying them with those who brighten our lives with their mere presence makes the time we\'ve lived even more precious and special.',
+                content: 'I like to enjoy moments with my friends and family, especially when they are people I like.'
+            },
+            {
+                id: 'post-3',
+                title: 'Family',
+                date: '8 de Julio de 2025',
+                author: 'Cristian Camacho',
+                category: 'family',
+                categoryDisplay: 'Family',
+                media: [
+                { type: 'video', url: 'Mateo.mp4' },
+                { type: 'image', url: 'fami1.jpeg' },
+                { type: 'image', url: 'fami2.jpeg' },
+                { type: 'image', url: 'Familia1.jpeg' },
+                { type: 'image', url: 'herma7.jpeg' },
+                { type: 'image', url: 'Mam5.jpeg' },
+                { type: 'image', url: 'herma1.jpeg' },
+                { type: 'image', url: 'herma2.jpeg' },
+                { type: 'image', url: 'herma3.jpeg' },
+                { type: 'image', url: 'Herma13.jpeg' },
+                { type: 'image', url: 'Mateo.jpeg' },
+                { type: 'image', url: 'Pap3.jpeg' },
+                { type: 'image', url: 'pap1.jpeg' },
+                { type: 'image', url: 'pap2.jpeg' },
+                
+                ],
+                excerpt: 'Spending time with my family will always be one of the best things that can happen to me, especially if it\'s traveling with them, going out to eat, or many other things. I think that family is one of the things we should enjoy the most since it\'s only one for the rest of our lives.',
+                content: ''
+            },
+            {
+                id: 'post-4',
+                title: 'Favorite Movies',
+                date: '7 de Julio de 2025',
+                author: 'Cristian Camacho',
+                category: 'Movies',
+                categoryDisplay: 'Movies',
+                media: [
+                    { 
+                        type: 'video', 
+                        url: ''
+                    }
+                ],
+                excerpt: 'Movies and series are a way I distract myself, in general I like older movies and series more, my favorite series are Vampire Diaries, The Originals and my favorite movies are Meet Joe Black, Fear, Transformers, Justice League, The Avengers, The Lagoon.',
+                content: ''
+            },
+            {
+                id: 'post-5',
+                title: 'Favorite Sports',
+                date: '7 de Julio de 2025',
+                author: 'Cristian Camacho',
+                category: 'Sports',
+                categoryDisplay: 'Sports',
+                media: [
+                    { type: 'image', url: '' }
+                ],
+                excerpt: 'My favorite sports have been soccer since I was little, and then basketball, although it always seemed like a difficult sport to practice. My favorite players in each of these are Neymar and Lamelo Ball.',
+                content: ''
+            },
+            {
+                id: 'post-6',
+                title: 'Favorite Hobbies',
+                date: '7 de Julio de 2025',
+                author: 'Cristian Camacho',
+                category: 'Hobbies',
+                categoryDisplay: 'Hobbies',
+                media: [
+                    { type: 'image', url: '' }
+                ],
+                excerpt: 'My favorite hobbies are playing soccer at night, hanging out with friends, watching series and movies while I eat, and occasionally playing basketball with friends.',
+                content: ''
+            },
+            {
+                id: 'post-8',
+                title: 'Glorario',
+                date: '7 de Julio de 2025',
+                author: 'Cristian Camacho',
+                category: 'Glorario',
+                categoryDisplay: 'Glorario',
+                media: [
+                    { type: 'image', url: '' }
+                ],
+                excerpt: 'Las palabras que no entiendo son: -Watching, -These, -Although, -Been, -Little, -Traveling, -Shouldds',
+                content: ''
+            },
+            {
+                id: 'post-7',
+                title: 'Favorite Singers',
+                date: '7 de Julio de 2025',
+                author: 'Cristian Camacho',
+                category: 'Singers',
+                categoryDisplay: 'Singers',
+                media: [
+                    { type: 'video', url: '' } // ¡CAMBIA ESTO por tu URL de video!
+                ],
+                excerpt: 'In music I like a little bit of everything, both music in English and Spanish, these singers are Junior H, Ozuna, Romeo Santos, Maluma, Rauw Alejandro, Paulo Londra, Travis Scott, 21 Savage, Cris MJ, Floyy Menor',
+                content: ''
+            }
+        ];
+
+        // Referencias al DOM para el modal
+        const postModalOverlay = document.getElementById('post-modal-overlay');
+        const modalPostContent = document.getElementById('modal-post-content');
+        const modalCloseBtn = document.getElementById('modal-close-btn');
+        const notificationContainer = document.getElementById('notification-container');
+
+        /**
+         * Muestra una notificación personalizada.
+         * @param {string} message - El mensaje a mostrar.
+         * @param {'success'|'error'|'info'|'warning'} type - El tipo de notificación (define el estilo).
+         * @param {number} duration - Duración en milisegundos antes de que la notificación desaparezca automáticamente (0 para persistente).
+         */
+        function showNotification(message, type = 'info', duration = 5000) {
+            const notificationDiv = document.createElement('div');
+            notificationDiv.className = `notification ${type}`;
+            notificationDiv.innerHTML = `
+                <span class="notification-message">${message}</span>
+                <button class="notification-close-btn">&times;</button>
+            `;
+
+            notificationContainer.prepend(notificationDiv); // Añade al principio para que las nuevas estén arriba
+
+            // Activa la animación de entrada
+            setTimeout(() => {
+                notificationDiv.classList.add('show');
+            }, 10); // Pequeño retraso para que la transición funcione
+
+            // Cierra la notificación
+            const closeBtn = notificationDiv.querySelector('.notification-close-btn');
+            closeBtn.addEventListener('click', () => {
+                hideNotification(notificationDiv);
+            });
+
+            if (duration > 0) {
+                setTimeout(() => {
+                    hideNotification(notificationDiv);
+                }, duration);
+            }
+        }
+
+        function hideNotification(notificationElement) {
+            notificationElement.classList.remove('show');
+            notificationElement.classList.add('hide');
+            notificationElement.addEventListener('transitionend', () => {
+                notificationElement.remove();
+            }, { once: true }); // Elimina el elemento del DOM después de la transición
+        }
+
+        /**
+         * Genera el HTML para los elementos multimedia (imagen o video) de una publicación.
+         * @param {Array} mediaItems - El array 'media' de la publicación (ej. post.media).
+         * @param {string} containerClassName - Clase CSS a aplicar al contenedor general de los medios.
+         * @param {boolean} addControls - Si el video debe tener controles (solo para video en modal).
+         * @param {number} limit - Número máximo de elementos multimedia a mostrar (0 para mostrar todos).
+         * @returns {string} El HTML de los elementos multimedia.
+         */
+        function generateMediaHtml(mediaItems, containerClassName, addControls = false, limit = 0) {
+            if (!mediaItems || mediaItems.length === 0) return '';
+
+            let html = '';
+            const itemsToRender = limit > 0 ? mediaItems.slice(0, limit) : mediaItems;
+
+            itemsToRender.forEach((media, index) => {
+                // Asegúrate de que la URL del medio exista
+                if (!media.url) return;
+
+                // Determina la ruta correcta de la URL del medio
+                const mediaSrc = media.url.startsWith('http') || media.url.startsWith('/') ? media.url : `assets/images/${media.url}`;
+
+                if (media.type === 'image') {
+                    html += `
+                        <div class="${containerClassName} media-container">
+                            <img src="${mediaSrc}" alt="Contenido multimedia">
+                        </div>
+                    `;
+                } else if (media.type === 'video') {
+                    // Si es un video de YouTube (URL con youtube.com)
+                    if (media.url.includes('youtube.com')) {
+                        html += `
+                            <div class="${containerClassName} media-container">
+                                <iframe 
+                                    width="560" 
+                                    height="315" 
+                                    src="${media.url}" 
+                                    title="YouTube video player" 
+                                    frameborder="0" 
+                                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                                    allowfullscreen
+                                ></iframe>
+                            </div>
+                        `;
+                    } else {
+                        // Para videos locales
+                        let videoAttributes = 'preload="metadata" playsinline';
+                        if (addControls || (containerClassName.includes('post-card-media') && index === 0)) {
+                            videoAttributes += ' controls';
+                        } else {
+                            videoAttributes += ' loop muted';
+                        }
+
+                        html += `
+                            <div class="${containerClassName} media-container">
+                                <video ${videoAttributes}>
+                                    <source src="${mediaSrc}" type="video/mp4">
+                                    Tu navegador no soporta el elemento de video.
+                                </video>
+                            </div>
+                        `;
+                    }
+                }
+            });
+            return html;
+        }
+
+        // Función para renderizar el contenido completo de una publicación en el modal
+        function renderSinglePostInModal(postId) {
+            const post = blogPosts.find(p => p.id === postId);
+            if (post) {
+                modalPostContent.innerHTML = `
+                    <div class="relative">
+                        ${generateMediaHtml(post.media, 'single-post-media', true, 0)} <h2 class="text-3xl lg:text-4xl font-bold mb-3 text-gray-900">${post.title}</h2>
+                        <div class="post-meta text-gray-600 text-md mb-6 flex flex-wrap gap-x-6 gap-y-2">
+                            <span>${post.date}</span>
+                            <span>Por <span class="font-semibold">${post.author}</span></span>
+                            <span>En <a href="#category-${post.category}" class="category-link text-blue-600 hover:underline" onclick="closeModal();">${post.categoryDisplay}</a></span>
+                        </div>
+                        <div class="prose max-w-none text-gray-700 leading-relaxed text-lg">
+                            <p>${post.content}</p>
+                            </div>
+                    </div>
+                `;
+                openModal(); // Abre el modal usando la nueva función
+            } else {
+                showNotification('La publicación solicitada no se encontró.', 'error');
+            }
+        }
+
+        // Funciones para abrir y cerrar el modal
+        function openModal() {
+            postModalOverlay.classList.add('show');
+            document.body.classList.add('overflow-hidden');
+            // Si el modal tiene un video, asegúrate de que se reproduzca
+            const videoElement = modalPostContent.querySelector('video');
+            if (videoElement) {
+                videoElement.play().catch(e => console.error("Error al intentar reproducir el video:", e));
+            }
+        }
+
+        function closeModal() {
+            // Pausar cualquier video en el modal antes de cerrarlo
+            const videoElement = modalPostContent.querySelector('video');
+            if (videoElement) {
+                videoElement.pause();
+                videoElement.currentTime = 0; // Opcional: reiniciar el video al principio
+            }
+
+            postModalOverlay.classList.remove('show');
+            document.body.classList.remove('overflow-hidden');
+            modalPostContent.innerHTML = ''; // Limpiar el contenido del modal
+        }
+
+        // Event listeners para cerrar el modal
+        modalCloseBtn.addEventListener('click', closeModal);
+        postModalOverlay.addEventListener('click', (e) => {
+            if (e.target === postModalOverlay) {
+                closeModal();
+            }
+        });
+        // Cerrar con tecla ESC
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && postModalOverlay.classList.contains('show')) {
+                closeModal();
+            }
+        });
+
+        // Función para renderizar una tarjeta de publicación (con "Leer Más" que abre modal)
+        function renderPostCard(post) {
+            return `
+                <article class="post-card bg-white p-6 mb-6 rounded-lg shadow-md hover:shadow-lg transform hover:-translate-y-1 transition-all duration-300">
+                    ${generateMediaHtml(post.media, 'post-card-media', false, 1)} <h2 class="text-2xl lg:text-3xl font-bold mb-2 text-gray-900">${post.title}</h2>
+                    <div class="post-meta text-gray-600 text-sm mb-4 flex flex-wrap gap-x-4 gap-y-2">
+                        <span>${post.date}</span>
+                        <span>Por <a href="#" class="text-blue-600 hover:underline">${post.author}</a></span>
+                        <span>En <a href="#category-${post.category}" class="category-link text-blue-600 hover:underline">${post.categoryDisplay}</a></span>
+                    </div>
+                    <div class="post-content text-gray-700 leading-relaxed mb-4">
+                        <p>${post.excerpt}</p>
+                    </div>
+                    <button data-post-id="${post.id}" class="read-more-btn inline-block px-5 py-2 bg-blue-600 text-white rounded-md font-semibold hover:bg-blue-700 transition-colors duration-300 text-sm uppercase tracking-wide cursor-pointer">Leer Más</button>
+                </article>
+            `;
+        }
+
+        // Función para renderizar la página de inicio (todas las publicaciones)
+        function renderHomePage() {
+            const contentDiv = document.getElementById('blog-content');
+            contentDiv.innerHTML = '<h2 class="text-3xl lg:text-4xl font-bold mb-8 text-gray-900">Últimas Publicaciones</h2>';
+            blogPosts.sort((a, b) => new Date(b.date) - new Date(a.date)).forEach(post => { // Ordena por fecha
+                contentDiv.innerHTML += renderPostCard(post);
+            });
+            attachReadMoreListeners(); // Adjuntar listeners después de renderizar
+        }
+
+        // Función para renderizar la página de una categoría específica
+        function renderCategoryPage(categorySlug) {
+            const contentDiv = document.getElementById('blog-content');
+            const filteredPosts = blogPosts.filter(post => post.category === categorySlug);
+
+            const categoryName = filteredPosts.length > 0
+                ? filteredPosts[0].categoryDisplay
+                : (Object.values(getCategoriesData()).find(cat => cat.slug === categorySlug)?.name || 'Categoría Desconocida');
+
+            contentDiv.innerHTML = `<h2 class="text-3xl lg:text-4xl font-bold mb-8 text-gray-900">Categoría: ${categoryName}</h2>`;
+            if (filteredPosts.length > 0) {
+                filteredPosts.forEach(post => {
+                    contentDiv.innerHTML += renderPostCard(post);
+                });
+            } else {
+                contentDiv.innerHTML += '<p class="text-lg text-gray-600">No hay publicaciones en esta categoría.</p>';
+            }
+            attachReadMoreListeners(); // Adjuntar listeners después de renderizar
+        }
+
+        // Función para renderizar la página "Acerca de"
+        function renderAboutPage() {
+            const contentDiv = document.getElementById('blog-content');
+            contentDiv.innerHTML = `
+                <div class="bg-white p-8 rounded-lg shadow-md">
+                    <h2 class="text-3xl lg:text-4xl font-bold mb-6 text-gray-900">Acerca de Mi Increíble Blog</h2>
+                    <p class="text-lg text-gray-700 leading-relaxed mb-4">
+                        Bienvenidos a Mi Increíble Blog, tu fuente de inspiración y conocimiento sobre diversos temas. Desde programación y ciencia de datos hasta recetas deliciosas y consejos de estilo de vida, nuestro objetivo es proporcionar contenido de alta calidad y fácil de entender.
+                    </p>
+                    <p class="text-lg text-gray-700 leading-relaxed">
+                        Nuestro equipo de apasionados escritores se dedica a explorar nuevas ideas y a compartir sus conocimientos contigo. ¡Esperamos que disfrutes de tu estancia y encuentres algo que te inspire!
+                    </p>
+                </div>
+            `;
+        }
+
+        // Función para renderizar la página de "Contacto"
+        function renderContactPage() {
+            const contentDiv = document.getElementById('blog-content');
+            contentDiv.innerHTML = `
+                <div class="bg-white p-8 rounded-lg shadow-md">
+                    <h2 class="text-3xl lg:text-4xl font-bold mb-6 text-gray-900">Contáctanos</h2>
+                    <p class="text-lg text-gray-700 leading-relaxed mb-4">
+                        ¿Tienes alguna pregunta, sugerencia o simplemente quieres saludar? ¡Nos encantaría saber de ti! Puedes contactarnos a través del siguiente formulario o enviarnos un correo electrónico.
+                    </p>
+                    <form class="space-y-4">
+                        <div>
+                            <label for="contact-name" class="block text-gray-700 text-lg font-bold mb-2">Nombre:</label>
+                            <input type="text" id="contact-name" name="name" class="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400" placeholder="Tu Nombre">
+                        </div>
+                        <div>
+                            <label for="contact-email" class="block text-gray-700 text-lg font-bold mb-2">Email:</label>
+                            <input type="email" id="contact-email" name="email" class="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400" placeholder="tu.email@ejemplo.com">
+                        </div>
+                        <div>
+                            <label for="contact-message" class="block text-gray-700 text-lg font-bold mb-2">Mensaje:</label>
+                            <textarea id="contact-message" name="message" rows="5" class="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400" placeholder="Escribe tu mensaje aquí..."></textarea>
+                        </div>
+                        <button type="submit" class="bg-blue-600 text-white px-6 py-3 rounded-md font-semibold hover:bg-blue-700 transition-colors duration-300">Enviar Mensaje</button>
+                    </form>
+                    <p class="text-lg text-gray-700 mt-6">También puedes escribirnos a: <a href="mailto:info@miincreibleblog.com" class="text-blue-600 hover:underline">info@miincreibleblog.com</a></p>
+                </div>
+            `;
+        }
+
+        // Función para renderizar la página de administración (añadir publicaciones)
+        function renderAdminPage() {
+            const contentDiv = document.getElementById('blog-content');
+            contentDiv.innerHTML = `
+                <div class="bg-white p-8 rounded-lg shadow-md">
+                    <h2 class="text-3xl lg:text-4xl font-bold mb-6 text-gray-900">Panel de Administración (Solo Frontend)</h2>
+                    <p class="text-red-600 font-bold mb-4">¡Advertencia! Las publicaciones añadidas aquí NO se guardarán si recargas la página o cierras el navegador. Esto es solo una demostración en el lado del cliente.</p>
+                    <p class="text-orange-500 font-bold mb-4">Nota: El formulario solo permite añadir UN archivo multimedia por publicación. Para añadir MÚLTIPLES archivos, debes editar directamente el array 'blogPosts' en el código HTML.</p>
+
+                    <h3 class="text-2xl font-bold text-gray-800 mb-4 pb-2 border-b-2 border-gray-200">Añadir Nueva Publicación</h3>
+                    <form id="add-post-form" class="space-y-4">
+                        <div>
+                            <label for="post-title" class="block text-gray-700 text-lg font-bold mb-2">Título:</label>
+                            <input type="text" id="post-title" name="title" class="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400" required>
+                        </div>
+                        <div>
+                            <label for="post-author" class="block text-gray-700 text-lg font-bold mb-2">Autor:</label>
+                            <input type="text" id="post-author" name="author" class="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400" required>
+                        </div>
+                        <div>
+                            <label for="post-category-display" class="block text-gray-700 text-lg font-bold mb-2">Categoría (Nombre a mostrar):</label>
+                            <input type="text" id="post-category-display" name="categoryDisplay" class="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400" required>
+                        </div>
+                        <div>
+                            <label for="post-category-slug" class="block text-gray-700 text-lg font-bold mb-2">Categoría (ID para URL - minúsculas, sin espacios, ej: "programacion"):</label>
+                            <input type="text" id="post-category-slug" name="category" class="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400" placeholder="ej: programacion-web" required>
+                        </div>
+                        <div>
+                            <label for="post-media-type" class="block text-gray-700 text-lg font-bold mb-2">Tipo de Contenido Multimedia (para 1 solo archivo):</label>
+                            <select id="post-media-type" name="mediaType" class="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400">
+                                <option value="image">Imagen</option>
+                                <option value="video">Video</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label for="post-media-url" class="block text-gray-700 text-lg font-bold mb-2">URL de la Imagen / Video (opcional, para 1 solo archivo):</label>
+                            <input type="url" id="post-media-url" name="mediaUrl" class="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400" placeholder="https://ejemplo.com/imagen.jpg o assets/videos/mi_video.mp4">
+                        </div>
+                        <div>
+                            <label for="post-excerpt" class="block text-gray-700 text-lg font-bold mb-2">Extracto (Resumen):</label>
+                            <textarea id="post-excerpt" name="excerpt" rows="3" class="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400" required></textarea>
+                        </div>
+                        <div>
+                            <label for="post-content" class="block text-gray-700 text-lg font-bold mb-2">Contenido Completo:</label>
+                            <textarea id="post-content" name="content" rows="10" class="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400" required></textarea>
+                        </div>
+                        <button type="submit" class="bg-green-600 text-white px-6 py-3 rounded-md font-semibold hover:bg-green-700 transition-colors duration-300">Añadir Publicación</button>
+                    </form>
+                </div>
+            `;
+
+            // Adjuntar listener al formulario de añadir publicación
+            document.getElementById('add-post-form').addEventListener('submit', handleAddPost);
+        }
+
+        // Función para manejar el envío del formulario de añadir publicación
+        function handleAddPost(event) {
+            event.preventDefault(); // Prevenir el envío real del formulario
+
+            const form = event.target;
+            // Validaciones básicas antes de añadir
+            if (!form['post-title'].value || !form['post-author'].value || !form['post-category-display'].value || !form['post-category-slug'].value || !form['post-excerpt'].value || !form['post-content'].value) {
+                showNotification('Por favor, rellena todos los campos obligatorios para la publicación.', 'error');
+                return; // Detener la ejecución si faltan campos
+            }
+
+            const mediaUrlInput = form['post-media-url'].value;
+            const newMediaArray = mediaUrlInput ? [ // Crea el array 'media'
+                {
+                    type: form['post-media-type'].value,
+                    url: mediaUrlInput
+                }
+            ] : []; // Si no hay URL, el array de media está vacío
+
+            const newPost = {
+                id: 'post-' + Date.now(), // ID único basado en la marca de tiempo
+                title: form['post-title'].value,
+                date: new Date().toLocaleDateString('es-ES', { year: 'numeric', month: 'long', day: 'numeric' }),
+                author: form['post-author'].value,
+                category: form['post-category-slug'].value.toLowerCase().replace(/[^a-z0-9-]/g, '').replace(/--+/g, '-'), // Limpia el slug
+                categoryDisplay: form['post-category-display'].value,
+                media: newMediaArray, // Asigna el nuevo array de medios
+                excerpt: form['post-excerpt'].value,
+                content: form['post-content'].value
+            };
+
+            blogPosts.unshift(newPost); // Añade la nueva publicación al principio del array
+            showNotification('¡Publicación añadida correctamente! (Solo para esta sesión)', 'success', 8000); // Muestra notificación de éxito
+            form.reset(); // Limpia el formulario
+            // Volver al inicio o a la página de la categoría recién creada
+            window.location.hash = '#home';
+        }
+
+        // Función para obtener datos de categorías y su conteo
+        function getCategoriesData() {
+            const categories = {};
+            blogPosts.forEach(post => {
+                if (categories[post.category]) {
+                    categories[post.category].count++;
+                } else {
+                    categories[post.category] = {
+                        slug: post.category,
+                        name: post.categoryDisplay,
+                        count: 1
+                    };
+                }
+            });
+            // Convertir el objeto a un array y ordenar por nombre
+            return Object.values(categories).sort((a, b) => a.name.localeCompare(b.name));
+        }
+
+        // Función para poblar la lista de categorías en la barra lateral
+        function populateCategories() {
+            const categoryList = document.getElementById('category-list');
+            const categoriesData = getCategoriesData();
+
+            categoryList.innerHTML = '';
+            categoriesData.forEach(category => {
+                categoryList.innerHTML += `
+                    <li><a href="#category-${category.slug}" class="category-link block py-2 px-3 text-gray-700 hover:text-blue-600 hover:bg-gray-50 rounded-md transition-colors duration-200">${category.name} (${category.count})</a></li>
+                `;
+            });
+        }
+
+        // Función para poblar la lista de publicaciones recientes en la barra lateral
+        function populateRecentPosts() {
+            const recentPostsList = document.getElementById('recent-posts-list');
+            recentPostsList.innerHTML = '';
+            // Mostrar las últimas 5 publicaciones, ordenadas por fecha si fuera necesario, aquí ya están por orden de aparición
+            // blogPosts se ordena en renderHomePage, pero aquí se toma directamente para evitar re-ordenar el array original
+            const sortedPosts = [...blogPosts].sort((a, b) => new Date(b.date) - new Date(a.date));
+            sortedPosts.slice(0, 5).forEach(post => {
+                recentPostsList.innerHTML += `
+                    <li><a href="#post-${post.id}" class="post-link block py-2 px-3 text-gray-700 hover:text-blue-600 hover:bg-gray-50 rounded-md transition-colors duration-200" data-post-id="${post.id}">${post.title}</a></li>
+                `;
+            });
+             // Adjuntar listener a los enlaces de publicaciones recientes para abrir el modal
+            recentPostsList.querySelectorAll('.post-link').forEach(link => {
+                link.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    renderSinglePostInModal(link.dataset.postId);
+                });
+            });
+        }
+
+        // Función para adjuntar listeners de "Leer Más"
+        function attachReadMoreListeners() {
+            document.querySelectorAll('.read-more-btn').forEach(button => {
+                button.addEventListener('click', (e) => {
+                    const postId = e.target.dataset.postId;
+                    renderSinglePostInModal(postId);
+                });
+            });
+        }
+
+        // Función para actualizar la clase 'active' en los enlaces de navegación
+        function updateActiveClass(currentHash) {
+            document.querySelectorAll('.nav-link').forEach(link => {
+                link.classList.remove('active');
+                if (link.getAttribute('href') === currentHash) {
+                    link.classList.add('active');
+                }
+            });
+            // La lógica para resaltar categorías en la barra lateral es más compleja si la ruta es #category-slug
+            // Por simplicidad, solo resalta los enlaces de navegación principales.
+        }
+
+        // Función principal de enrutamiento basada en el hash de la URL
+        function handleRouting() {
+            const hash = window.location.hash || '#home'; // Por defecto, va a #home
+            const parts = hash.split('-'); // Divide el hash para manejar #category-slug o #post-id
+
+            updateActiveClass(hash); // Actualiza la clase 'active' en los enlaces de navegación
+
+            // Cierra el modal si está abierto y cambiamos de ruta
+            if (postModalOverlay.classList.contains('show')) {
+                closeModal();
+            }
+
+            if (hash === '#home') {
+                renderHomePage();
+            } else if (hash === '#categories') {
+                renderHomePage(); // Muestra todas las publicaciones, ya que la barra lateral ya lista categorías
+            } else if (hash === '#about') {
+                renderAboutPage();
+            } else if (hash === '#contact') {
+                renderContactPage();
+            } else if (hash === '#admin') {
+                renderAdminPage();
+            } else if (parts[0] === '#category' && parts[1]) {
+                renderCategoryPage(parts[1]);
+            }
+            // NOTA: Para #post-ID, ya no se renderiza una página separada, sino un modal.
+            // Los enlaces "Leer Más" y "Publicaciones Recientes" ahora disparan el modal directamente.
+            // Si alguien introduce #post-ID directamente en la URL, no se manejará como una página propia aquí.
+            else {
+                // Si el hash no coincide con ninguna ruta, redirige a la página de inicio
+                window.location.hash = '#home';
+            }
+            // Asegúrate de que la barra lateral siempre esté poblada
+            populateCategories();
+            populateRecentPosts();
+        }
+
+        // Event listener para manejar cambios en el hash de la URL (navegación)
+        window.addEventListener('hashchange', handleRouting);
+
+        // Inicializar la aplicación al cargar el DOM
+        document.addEventListener('DOMContentLoaded', () => {
+            handleRouting(); // Ejecutar el enrutador al cargar la página
+        });
+
+        // Añadir listeners para los formularios de búsqueda
+        document.querySelector('.search-form').addEventListener('submit', function(event) {
+            event.preventDefault(); // Evitar el envío del formulario
+            const searchTerm = this.querySelector('input[type="text"]').value.toLowerCase();
+            if (searchTerm) {
+                const searchResults = blogPosts.filter(post =>
+                    post.title.toLowerCase().includes(searchTerm) ||
+                    post.excerpt.toLowerCase().includes(searchTerm) ||
+                    post.content.toLowerCase().includes(searchTerm) ||
+                    post.categoryDisplay.toLowerCase().includes(searchTerm) ||
+                    post.author.toLowerCase().includes(searchTerm)
+                );
+                const contentDiv = document.getElementById('blog-content');
+                contentDiv.innerHTML = `<h2 class="text-3xl lg:text-4xl font-bold mb-8 text-gray-900">Resultados de búsqueda para: "${searchTerm}"</h2>`;
+                if (searchResults.length > 0) {
+                    searchResults.forEach(post => {
+                        contentDiv.innerHTML += renderPostCard(post);
+                    });
+                    attachReadMoreListeners(); // Adjuntar listeners para los nuevos resultados
+                } else {
+                    contentDiv.innerHTML += '<p class="text-lg text-gray-600">No se encontraron publicaciones que coincidan con su búsqueda.</p>';
+                    showNotification(`No se encontraron resultados para "${searchTerm}".`, 'info');
+                }
+            } else {
+                showNotification('Por favor, introduce un término de búsqueda.', 'warning');
+            }
+        });
+    </script>
+
+</body>
+</html>
