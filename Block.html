@@ -690,7 +690,21 @@
             }
             
             contentContainer.innerHTML = '<h2 class="text-3xl lg:text-4xl font-bold mb-8 text-gray-900">Últimas Publicaciones</h2>';
-            blogPosts.sort((a, b) => new Date(b.date) - new Date(a.date)).forEach(post => {
+            // Ordenar posts por fecha (más recientes primero)
+            const sortedPosts = [...blogPosts].sort((a, b) => new Date(b.date) - new Date(a.date));
+            
+            // Asegurarse de que el post 9 aparezca en la posición correcta
+            const post9 = blogPosts.find(post => post.id === 'post-9');
+            if (post9) {
+                const post9Index = sortedPosts.findIndex(post => post.id === 'post-9');
+                if (post9Index !== -1) {
+                    // Mover el post 9 al inicio
+                    sortedPosts.splice(post9Index, 1);
+                    sortedPosts.unshift(post9);
+                }
+            }
+            
+            sortedPosts.forEach(post => {
                 contentContainer.innerHTML += renderPostCard(post);
             });
             attachReadMoreListeners(); // Adjuntar listeners después de renderizar
